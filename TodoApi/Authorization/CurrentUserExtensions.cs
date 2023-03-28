@@ -13,22 +13,13 @@ public static class CurrentUserExtensions
         return services;
     }
 
-    private sealed class ClaimsTransformation : IClaimsTransformation
+    private sealed class ClaimsTransformation(CurrentUser currentUser, UserManager<TodoUser> userManager) : IClaimsTransformation
     {
-        private readonly CurrentUser _currentUser;
-        private readonly UserManager<TodoUser> _userManager;
-
-        public ClaimsTransformation(CurrentUser currentUser, UserManager<TodoUser> userManager)
-        {
-            _currentUser = currentUser;
-            _userManager = userManager;
-        }
-
         public async Task<ClaimsPrincipal> TransformAsync(ClaimsPrincipal principal)
         {
             // We're not going to transform anything. We're using this as a hook into authorization
             // to set the current user without adding custom middleware.
-            _currentUser.Principal = principal;
+            currentUser.Principal = principal;
 
             var loginProvider = principal.FindFirstValue("provider");
 
@@ -36,9 +27,9 @@ public static class CurrentUserExtensions
             {
                 // Resolve the user manager and see if the current user is a valid user in the database
                 // we do this once and store it on the current user.
-                _currentUser.User = loginProvider is null
-                    ? await _userManager.FindByNameAsync(name)
-                    : await _userManager.FindByLoginAsync(loginProvider, name);
+                currentUser.User = loginProvider is null
+                    ? await userManager.FindByNameAsync(name)
+                    : await userManager.FindByLoginAsync(loginProvider, name);
             }
 
             return principal;
