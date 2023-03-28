@@ -1,17 +1,10 @@
 ﻿namespace Todo.Web.Server;
 
-public class TodoClient
+public class TodoClient(HttpClient client)
 {
-    private readonly HttpClient _client;
-
-    public TodoClient(HttpClient client)
-    {
-        _client = client;
-    }
-
     public async Task<string?> GetTokenAsync(UserInfo userInfo)
     {
-        var response = await _client.PostAsJsonAsync("users/token", userInfo);
+        var response = await client.PostAsJsonAsync("users/token", userInfo);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -25,7 +18,7 @@ public class TodoClient
 
     public async Task<string?> CreateUserAsync(UserInfo userInfo)
     {
-        var response = await _client.PostAsJsonAsync("users", userInfo);
+        var response = await client.PostAsJsonAsync("users", userInfo);
 
         if (!response.IsSuccessStatusCode)
         {
@@ -37,7 +30,7 @@ public class TodoClient
 
     public async Task<string?> GetOrCreateUserAsync(string provider, ExternalUserInfo userInfo)
     {
-        var response = await _client.PostAsJsonAsync($"users/token/{provider}", userInfo);
+        var response = await client.PostAsJsonAsync($"users/token/{provider}", userInfo);
 
         if (!response.IsSuccessStatusCode)
         {
